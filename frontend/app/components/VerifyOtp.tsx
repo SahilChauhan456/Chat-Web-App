@@ -1,12 +1,15 @@
 "use client";
 import axios from "axios";
 import { ArrowRight, ChevronLeft, Loader2, Lock } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { redirect, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
-import { user_service } from "../context/AppContext";
+import { useAppData, user_service } from "../context/AppContext";
+import Loading from "./Loading";
+import toast from "react-hot-toast";
 
 const VerifyOtp = () => {
+  const {isAuth, setIsAuth, setUser, loading: userLoading} = useAppData();
   const [loading, setLoading] = useState<boolean>(false);
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [error, setError] = useState<string>("");
@@ -73,7 +76,7 @@ const VerifyOtp = () => {
         email,
         otp: otpString,
       });
-      alert(data.message);
+      toast.success(data.message);
       Cookies.set("token", data.token, {
         expires: 15,
         secure: false, //because we are hosting on aws and so that why give it false
@@ -82,6 +85,8 @@ const VerifyOtp = () => {
 
       setOtp(["", "", "", "", "", ""]);
       inputRefs.current[0]?.focus();
+      setUser(data.user);
+      setIsAuth(true);
     } catch (error: any) {
       setError(error.response.data.message);
     } finally {
@@ -96,7 +101,7 @@ const VerifyOtp = () => {
       const { data } = await axios.post(`http://localhost:5000/api/v1/login`, {
         email,
       });
-      alert(data.message);
+      toast.success(data.message);
       setTimer(60);
     } catch (error: any) {
       setError(error.response.data.message);
@@ -104,6 +109,10 @@ const VerifyOtp = () => {
       setResendLoading(false);
     }
   };
+
+  if(userLoading) return <Loading />;
+
+  if(isAuth) redirect("/chat");
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
