@@ -167,8 +167,8 @@ export const sendMessage = TryCatch(async (req: AuthenticatedRequest, res) => {
             url: imageFile.path,
             publicId: imageFile.filename,
         };
-        messageData.messageType = "image",
-            messageData.text = text || "",
+        messageData.messageType = "image";
+        messageData.text = text || "";
 
     } else {
         messageData.text = text;
